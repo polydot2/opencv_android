@@ -1,0 +1,109 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'io.github.takahirom.roborazzi'
+}
+
+android {
+    namespace 'com.poly.sample'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.poly.sample"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"  // Standard
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+    kotlin {
+        jvmToolchain(21)
+    }
+    buildFeatures {
+        compose true
+    }
+    roborazzi {
+        outputDir.set(file('src/androidTest/assets/snapshots'))
+        compare {
+            outputDir.set(file('build/reports/roborazzi/comparisons'))
+        }
+    }
+    sourceSets {
+        test {
+            assets.srcDir file('src/test/assets')
+        }
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+    sourceSets {
+        test.assets.srcDirs += files("$projectDir/src/test/assets".toString())
+    }
+}
+
+dependencies {
+    implementation project(':app')
+
+    // Core + Compose (via catalog)
+    implementation libs.androidx.core.ktx
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.compose.material3
+    implementation libs.androidx.activity.compose
+    debugImplementation libs.androidx.compose.ui.tooling
+
+    // Tests instrumentés (via catalog, simplifié pour JUnit4)
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.espresso.core
+    testImplementation libs.androidx.test.runner
+    testImplementation libs.androidx.test.rules
+    testImplementation platform(libs.androidx.compose.bom)
+    testImplementation libs.androidx.ui.test.junit4
+    debugImplementation libs.androidx.compose.ui.testmanifest
+
+    // Roborazzi
+    testImplementation libs.robolectric
+    testImplementation libs.roborazzi
+    testImplementation libs.roborazzi.rule
+}
+
+// Task pour copier test assets vers main pour Robolectric
+tasks.register('copyTestAssets', Copy) {
+    from 'src/test/assets'
+    into 'src/debug/assets'  // Copie temporaire vers main pour mock
+    includeEmptyDirs = false
+}
+
+// Task pour copier .so de l'AAR buildé vers test jni
+tasks.register('copyJniFromLib', Copy) {
+    from project(':app').file('build/intermediates/cmake/debug/obj')  // .so buildés de la lib
+    into file('src/test/jniLibs')  // Copie vers test jni (Robolectric le mocke)
+    include '**/*.so'
+}
+
+tasks.register('preparetests') {
+    dependsOn copyTestAssets
+    dependsOn copyJniFromLib
+    doFirst {
+        delete fileTree(dir: 'src/debug/assets', include: '**/*')
+        delete fileTree(dir: 'src/test/jniLibs', include: '**/*')
+    }
+}
+
+tasks.named("tests") { dependsOn("preparetests") }

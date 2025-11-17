@@ -1,19 +1,24 @@
 [versions]
-# Android & Kotlin
 agp = "8.5.2"  # Android Gradle Plugin
-kotlin = "1.9.25"
-coreKtx = "1.13.1"
+kotlin = "2.2.21"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-
-# Compose (versions cohérentes via BOM)
-composeBom = "2024.10.00"  # Dernière stable 2025
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+composeBom = "2025.11.00"  # Dernière stable 2025
 
 # Activity & autres
-activityCompose = "1.9.2"
+activityCompose = "1.11.0"
+lifecycleRuntimeKtx = "2.9.4"
+roborazzi = "1.51.0"  # Latest stable 2025
+testRunner = "1.7.0"  # androidx.test:runner
+testRules = "1.7.0"   # androidx.test:rules
+robolectric = "4.16"  # Latest stable 2025
 
 [libraries]
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }
+roborazzi-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 
 # Compose
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,7 +34,12 @@ androidx-compose-ui-testmanifest = { group = "androidx.compose.ui", name = "ui-t
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }  # Now matches kotlin
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
