@@ -51,9 +51,6 @@ android {
             includeAndroidResources = true
         }
     }
-    sourceSets {
-        test.assets.srcDirs += files("$projectDir/src/test/assets".toString())
-    }
 }
 
 dependencies {
@@ -82,28 +79,3 @@ dependencies {
     testImplementation libs.roborazzi
     testImplementation libs.roborazzi.rule
 }
-
-// Task pour copier test assets vers main pour Robolectric
-tasks.register('copyTestAssets', Copy) {
-    from 'src/test/assets'
-    into 'src/debug/assets'  // Copie temporaire vers main pour mock
-    includeEmptyDirs = false
-}
-
-// Task pour copier .so de l'AAR buildé vers test jni
-tasks.register('copyJniFromLib', Copy) {
-    from project(':app').file('build/intermediates/cmake/debug/obj')  // .so buildés de la lib
-    into file('src/test/jniLibs')  // Copie vers test jni (Robolectric le mocke)
-    include '**/*.so'
-}
-
-tasks.register('preparetests') {
-    dependsOn copyTestAssets
-    dependsOn copyJniFromLib
-    doFirst {
-        delete fileTree(dir: 'src/debug/assets', include: '**/*')
-        delete fileTree(dir: 'src/test/jniLibs', include: '**/*')
-    }
-}
-
-tasks.named("tests") { dependsOn("preparetests") }

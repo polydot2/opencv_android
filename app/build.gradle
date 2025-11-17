@@ -6,13 +6,12 @@ plugins {
 android {
     namespace 'org.opencv'
     compileSdk 36
+    ndkVersion "29.0.14206865"
 
     defaultConfig {
         compileSdk
         minSdk 24
         targetSdk 36
-
-        ndkVersion "29.0.14206865"
 
         ndk {
             abiFilters 'arm64-v8a', 'armeabi-v7a'
@@ -21,7 +20,6 @@ android {
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_STL=c++_shared"
-                targets "opencv_jni_shared"
             }
         }
     }
@@ -45,13 +43,14 @@ android {
 
         }
     }
-    buildFeatures {
+    buildFeatures{
+        aidl true
         buildConfig true
     }
     sourceSets {
         main {
             jni.srcDirs += ['src/sdk/native/jni/include']
-            jniLibs.srcDirs += ['src/sdk/native/libs']
+            jniLibs.srcDirs += ['src/sdk/native/libs', 'build/intermediates/cxx/debug/obj']
             java.srcDirs += ['src/sdk/java/src']
             res.srcDirs += ['src/sdk/java/res']
         }
